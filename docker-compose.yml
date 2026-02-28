@@ -1,0 +1,21 @@
+services:
+  game-site:
+    image: nginx:alpine
+    container_name: game-web-pages
+    restart: unless-stopped
+    volumes:
+      # Map your local games folder to the Nginx web root
+      - ./games:/usr/share/nginx/html:ro
+    ports:
+      - "8081:80"   # LAN-only; firewall if needed
+    networks:
+      - homelab-gateway
+      - homelab
+
+
+
+networks:
+  homelab-gateway:
+    external: true
+  homelab:
+    external: true
