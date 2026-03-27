@@ -4,13 +4,143 @@
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Unity WebGL Player | cuborz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+      :root {
+        --bg-color: #09090b;
+        --card-bg: #18181b;
+        --text-primary: #fafafa;
+        --text-secondary: #a1a1aa;
+        --accent-color: #3f3f46;
+        --border-color: #27272a;
+      }
+
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-primary);
+        font-family: 'Inter', sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+      }
+
+      #game-container {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        background: #000;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      }
+
+      #unity-canvas {
+        background: #231f20;
+        max-width: 100%;
+        height: auto !important;
+      }
+
+      #description-section {
+        max-width: 900px;
+        width: 90%;
+        margin: 40px 0;
+        padding: 40px;
+        background: var(--card-bg);
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        line-height: 1.6;
+        animation: fadeIn 0.8s ease-out;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      #description-content h1 {
+        margin-top: 0;
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(to right, #fff, #a1a1aa);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      #description-content h2 {
+        font-size: 1.5rem;
+        color: var(--text-primary);
+        margin-top: 2rem;
+        border-bottom: 2px solid var(--accent-color);
+        padding-bottom: 0.5rem;
+      }
+
+      #description-content p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+      }
+
+      #description-content ul {
+        list-style: none;
+        padding: 0;
+      }
+
+      #description-content li {
+        position: relative;
+        padding-left: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: var(--text-secondary);
+      }
+
+      #description-content li::before {
+        content: "•";
+        position: absolute;
+        left: 0;
+        color: #fff;
+        font-weight: bold;
+      }
+
+      #description-content hr {
+        border: 0;
+        border-top: 1px solid var(--border-color);
+        margin: 30px 0;
+      }
+
+      #description-content em {
+        color: var(--text-secondary);
+        font-style: italic;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        #description-section {
+          padding: 24px;
+          margin: 20px 0;
+        }
+        #description-content h1 {
+          font-size: 2rem;
+        }
+      }
+    </style>
   </head>
-  <body style="text-align: center; padding: 0; border: 0; margin: 0;">
-    <canvas id="unity-canvas" width=1280 height=720 tabindex="-1" style="width: 1280px; height: 720px; background: #808080"></canvas>
+  <body>
+    <div id="game-container">
+      <canvas id="unity-canvas" width=1280 height=720 tabindex="-1"></canvas>
+    </div>
+
+    <div id="description-section">
+      <div id="description-content">Loading description...</div>
+    </div>
+
     <script src="Build/webgl.loader.js"></script>
     <script>
+      // Unity instance creation
       if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        // Mobile device style: fill the whole browser client area with the game canvas:
         var meta = document.createElement('meta');
         meta.name = 'viewport';
         meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
@@ -32,9 +162,24 @@
         companyName: "TangArts",
         productName: "cuborz",
         productVersion: "0.0.2",
-        // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
-        // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
       });
+
+      // Fetch and render Markdown description
+      async function loadDescription() {
+        const content = document.getElementById('description-content');
+        try {
+          const response = await fetch('game_info.md');
+          if (!response.ok) throw new Error('Failed to load game_info.md');
+          const markdown = await response.text();
+          content.innerHTML = marked.parse(markdown);
+        } catch (error) {
+          console.error(error);
+          content.innerHTML = '<p style="color: #ef4444;">Error loading description. Please ensure game_info.md exists.</p>';
+        }
+      }
+
+      loadDescription();
     </script>
   </body>
 </html>
+
