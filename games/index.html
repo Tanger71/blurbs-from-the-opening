@@ -102,7 +102,7 @@
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
                 const files = await response.json();
-                const games = files.filter(f => f.type === 'directory' && !f.name.startsWith('.'));
+                const games = files.filter(f => f.type === 'directory' && !f.name.startsWith('.') && f.name !== 'shared');
 
                 if (games.length === 0) {
                     grid.innerHTML = '<div class="error">No games found. Add directories to the games folder!</div>';
