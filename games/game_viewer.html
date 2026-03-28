@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Viewer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #09090b;
+            --card-bg: #18181b;
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --accent-color: #3f3f46;
+            --border-color: #27272a;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #game-wrapper {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #game-container {
+            width: 100%;
+            height: 80vh; /* Adjust as needed */
+            background: #000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        #description-section {
+            max-width: 900px;
+            width: 90%;
+            margin: 40px 0;
+            padding: 40px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            line-height: 1.6;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #description-content h1 {
+            margin-top: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #fff, #a1a1aa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        #description-content h2 {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            margin-top: 2rem;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 0.5rem;
+        }
+
+        #description-content p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        #description-content ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        #description-content li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        #description-content li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        #description-content hr {
+            border: 0;
+            border-top: 1px solid var(--border-color);
+            margin: 30px 0;
+        }
+
+        #description-content em {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            #game-container {
+                height: 50vh;
+            }
+            #description-section {
+                padding: 24px;
+                margin: 20px 0;
+            }
+            #description-content h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-wrapper">
+        <div id="game-container">
+            <iframe id="game-iframe" src="" allow="autoplay; fullscreen; keyboard" allowfullscreen></iframe>
+        </div>
+
+        <div id="description-section">
+            <div id="description-content">Loading description...</div>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const gameId = urlParams.get('game');
+
+        if (!gameId) {
+            document.body.innerHTML = '<h1>Error: No game specified</h1><p>Please return to the <a href="index.html">gallery</a>.</p>';
+        } else {
+            const iframe = document.getElementById('game-iframe');
+            const descriptionContent = document.getElementById('description-content');
+
+            // Set iframe src
+            iframe.src = `/${gameId}/index.html`;
+
+            // Set title
+            document.title = gameId.replace(/-/g, ' ').toUpperCase() + " | Sawyer's Games";
+
+            // Fetch and render Markdown description
+            async function loadDescription() {
+                try {
+                    const response = await fetch(`/${gameId}/game_info.md`);
+                    if (!response.ok) throw new Error('Failed to load game_info.md');
+                    const markdown = await response.text();
+                    descriptionContent.innerHTML = marked.parse(markdown);
+                } catch (error) {
+                    console.error(error);
+                    descriptionContent.innerHTML = '<p style="color: #ef4444;">No description found for this game.</p>';
+                }
+            }
+
+            loadDescription();
+        }
+    </script>
+</body>
+</html>
