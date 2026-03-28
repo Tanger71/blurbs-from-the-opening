@@ -1,7 +1,7 @@
 services:
   game-site:
     image: nginx:alpine
-    container_name: game-web-pages
+    container_name: mygames-site
     restart: unless-stopped
     volumes:
       # Map your local games folder to the Nginx web root
