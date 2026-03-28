@@ -1,3 +1,6 @@
 [submodule "games/blurbs-from-the-opening"]
 	path = games/blurbs-from-the-opening
 	url = https://github.com/Tanger71/blurbs-from-the-opening
+[submodule "games/warped-ranks"]
+	path = games/warped-ranks
+	url = git@github.com:coleslab/warped-ranks.git
