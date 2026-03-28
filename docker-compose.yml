@@ -1,11 +1,12 @@
 services:
   game-site:
     image: nginx:alpine
-    container_name: game-web-pages
+    container_name: mygames-site
     restart: unless-stopped
     volumes:
       # Map your local games folder to the Nginx web root
       - ./games:/usr/share/nginx/html:ro
+      - ./default.conf:/etc/nginx/conf.d/default.conf:ro
     ports:
       - "8081:80"   # LAN-only; firewall if needed
     networks:

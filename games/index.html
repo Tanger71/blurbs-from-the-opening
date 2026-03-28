@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A hub for sawyers games.">
+    <title>Sawyer's Games</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #f4f4f5;
+            color: #18181b;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #27272a;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #e4e4e7;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-decoration: none;
+            color: #27272a;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border-color: #d4d4d8;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-transform: capitalize;
+            word-break: break-word;
+        }
+
+        .game-icon {
+            width: 64px;
+            height: 64px;
+            object-fit: cover;
+            border: 2px solid #e4e4e7;
+            border-radius: 8px;
+            padding: 4px;
+            margin-bottom: 1rem;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .game-desc {
+            font-size: 0.9rem;
+            color: #52525b;
+            margin-top: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .loading,
+        .error {
+            text-align: center;
+            padding: 2rem;
+            color: #71717a;
+            grid-column: 1 / -1;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Sawyer's Games</h1>
+
+    <div class="grid" id="games-grid">
+        <div class="loading">Loading games...</div>
+    </div>
+
+    <script>
+        function formatName(name) {
+            name = name.replace(/\/$/, '');
+            return name.replace(/[-_]/g, ' ');
+        }
+
+        async function fetchGames() {
+            const grid = document.getElementById('games-grid');
+            try {
+                const response = await fetch('/api/games_list/');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                const files = await response.json();
+                const games = files.filter(f => f.type === 'directory' && !f.name.startsWith('.'));
+
+                if (games.length === 0) {
+                    grid.innerHTML = '<div class="error">No games found. Add directories to the games folder!</div>';
+                    return;
+                }
+
+                const gamesWithDesc = await Promise.all(games.map(async game => {
+                    let desc = '';
+                    try {
+                        const descResponse = await fetch(`/${game.name}/desc.txt`);
+                        if (descResponse.ok) {
+                            desc = await descResponse.text();
+                        }
+                    } catch (e) {
+                        // Ignore errors if desc.txt does not exist
+                    }
+                    return { ...game, description: desc };
+                }));
+
+                grid.innerHTML = gamesWithDesc.map(game => `
+                    <a href="/${game.name}/" class="card">
+                        <img src="/${game.name}/icon.png" alt="" class="game-icon" onerror="this.style.display='none'">
+                        <div class="card-title">${formatName(game.name)}</div>
+                        ${game.description ? `<div class="game-desc">${game.description}</div>` : ''}
+                    </a>
+                `).join('');
+
+            } catch (error) {
+                console.error("Error fetching games:", error);
+                grid.innerHTML = '<div class="error">Failed to load games list.</div>';
+            }
+        }
+
+        fetchGames();
+    </script>
+</body>
+
+</html>
